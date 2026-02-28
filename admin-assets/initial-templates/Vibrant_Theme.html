@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{user.full_name}} - Resume</title>
+
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        background: #f3f6fb;
+        color: #1e293b;
+        line-height: 1.6;
+        font-size: 13px;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: auto;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
+
+      /* ================= HEADER ================= */
+
+      .header {
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        color: #ffffff;
+        padding: 28px 32px;
+      }
+
+      .header-top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .profile-image {
+        width: 95px;
+        height: 95px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.6);
+      }
+
+      .name {
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .tagline {
+        font-size: 15px;
+        opacity: 0.95;
+        margin-top: 4px;
+      }
+
+      .contact-row {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 12px;
+        opacity: 0.95;
+      }
+
+      .contact-row a {
+        color: #ffffff;
+        text-decoration: none;
+      }
+
+      /* ================= LAYOUT ================= */
+
+      .content {
+        display: flex;
+      }
+
+      .sidebar {
+        width: 34%;
+        background: #f8fafc;
+        padding: 28px 24px;
+        border-right: 1px solid #e2e8f0;
+      }
+
+      .main {
+        width: 66%;
+        padding: 28px 32px;
+      }
+
+      /* ================= SECTIONS ================= */
+
+      .section {
+        margin-bottom: 26px;
+      }
+
+      .section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #4f46e5;
+        margin-bottom: 12px;
+      }
+
+      /* ================= ENTRIES ================= */
+
+      .entry {
+        margin-bottom: 18px;
+      }
+
+      .entry:last-child {
+        margin-bottom: 0;
+      }
+
+      .entry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 4px;
+      }
+
+      .entry-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #0f172a;
+      }
+
+      .entry-subtitle {
+        font-size: 12px;
+        color: #64748b;
+      }
+
+      .entry-date {
+        font-size: 11px;
+        color: #94a3b8;
+        white-space: nowrap;
+      }
+
+      .entry-description {
+        margin-top: 4px;
+        color: #334155;
+      }
+
+      .entry-list {
+        margin-top: 6px;
+        padding-left: 16px;
+      }
+
+      .entry-list li {
+        margin-bottom: 4px;
+      }
+
+      /* ================= SKILLS ================= */
+
+      .skill-bar-container {
+        margin-bottom: 10px;
+      }
+
+      .skill-bar-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 3px;
+      }
+
+      .skill-bar {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .skill-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5, #06b6d4);
+      }
+
+      /* ================= TAGS ================= */
+
+      .tech-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .tech-tag {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+      }
+
+      /* ================= SMALL LISTS ================= */
+
+      .simple-list div {
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+
+      a {
+        color: #4f46e5;
+        text-decoration: none;
+      }
+
+      @media print {
+        body {
+          background: none;
+        }
+        .page {
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <!-- ================= HEADER ================= -->
+
+      <div class="header">
+        <div class="header-top">
+          {{#if user.profileImage}}
+          <img
+            src="{{user.profileImage}}"
+            alt="{{user.full_name}}"
+            class="profile-image"
+          />
+          {{/if}}
+
+          <div>
+            <div class="name">{{user.full_name}}</div>
+            {{#if resume.title}}
+            <div class="tagline">{{resume.title}}</div>
+            {{/if}}
+          </div>
+        </div>
+
+        <div class="contact-row">
+          {{#if user.email}}<span>{{user.email}}</span>{{/if}}
+          {{#if user.phones}}<span>{{primaryPhone user.phones}}</span>{{/if}}
+          {{#if user.city}}
+          <span
+            >{{user.city}}{{#if user.state}}, {{user.state}}{{/if}}{{#if
+              user.country
+            }}
+            · {{user.country}}{{/if}}</span
+          >
+          {{/if}} {{#each socialMedia}}
+          <span><a href="{{this.url}}">{{this.platform}}</a></span>
+          {{/each}}
+        </div>
+      </div>
+
+      <!-- ================= BODY ================= -->
+
+      <div class="content">
+        <!-- ===== SIDEBAR ===== -->
+        <div class="sidebar">
+          {{#ifHasItems skills}}
+          <div class="section">
+            <div class="section-title">Skills</div>
+            {{#each skills}}
+            <div class="skill-bar-container">
+              <div class="skill-bar-label">
+                <span>{{this.name}}</span>
+                <span>{{this.expertise}}</span>
+              </div>
+              <div class="skill-bar">
+                <div
+                  class="skill-bar-fill"
+                  style="width: {{skillWidth this.expertise}};"
+                ></div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems languages}}
+          <div class="section">
+            <div class="section-title">Languages</div>
+            <div class="simple-list">
+              {{#each languages}}
+              <div><strong>{{this.name}}</strong> — {{this.level}}</div>
+              {{/each}}
+            </div>
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems certifications}}
+          <div class="section">
+            <div class="section-title">Certifications</div>
+            {{#each certifications}}
+            <div class="entry">
+              <div class="entry-title">{{this.name}}</div>
+              <div class="entry-subtitle">
+                {{this.issuingOrganization}} {{#if this.issueDate}} ·
+                {{formatDate this.issueDate}}{{/if}}
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems user.hobbies}}
+          <div class="section">
+            <div class="section-title">Interests</div>
+            <div class="entry-description">
+              {{joinArray user.hobbies ", "}}
+            </div>
+          </div>
+          {{/ifHasItems}}
+        </div>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main">
+          {{#if resume.summary}}
+          <div class="section">
+            <div class="section-title">Profile</div>
+            <div class="entry-description">{{resume.summary}}</div>
+          </div>
+          {{/if}}
+
+          {{#ifHasItems experiences}}
+          <div class="section">
+            <div class="section-title">Experience</div>
+            {{#each experiences}}
+            <div class="entry">
+              <div class="entry-header">
+                <div>
+                  <div class="entry-title">{{this.jobTitle}}</div>
+                  <div class="entry-subtitle">
+                    {{this.company}}{{#if this.location}} ·
+                    {{this.location}}{{/if}}{{#if this.employmentType}} ·
+                    {{this.employmentType}}{{/if}}
+                  </div>
+                </div>
+                <div class="entry-date">
+                  {{dateRange this.startDate this.endDate this.isCurrent}}
+                </div>
+              </div>
+
+              {{#if this.description}}
+              <div class="entry-description">{{this.description}}</div>
+              {{/if}} {{#ifHasItems this.achievements}}
+              <ul class="entry-list">
+                {{#each this.achievements}}
+                <li>{{this}}</li>
+                {{/each}}
+              </ul>
+              {{/ifHasItems}} {{#ifHasItems this.technologiesUsed}}
+              <div class="tech-tags">
+                {{#each this.technologiesUsed}}
+                <span class="tech-tag">{{this}}</span>
+                {{/each}}
+              </div>
+              {{/ifHasItems}}
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems educations}}
+          <div class="section">
+            <div class="section-title">Education</div>
+            {{#each educations}}
+            <div class="entry">
+              <div class="entry-header">
+                <div>
+                  <div class="entry-title">
+                    {{this.degree}}{{#if this.fieldOfStudy}} in
+                    {{this.fieldOfStudy}}{{/if}}
+                  </div>
+                  <div class="entry-subtitle">{{this.institution}}</div>
+                </div>
+                <div class="entry-date">
+                  {{dateRange this.startDate this.endDate this.isOngoing}}
+                </div>
+              </div>
+
+              {{#if this.grade}}
+              <div class="entry-description">Grade: {{this.grade}}</div>
+              {{/if}}
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems projects}}
+          <div class="section">
+            <div class="section-title">Projects</div>
+            {{#each projects}}
+            <div class="entry">
+              <div class="entry-header">
+                <div>
+                  <div class="entry-title">
+                    {{this.title}}{{#if this.role}} — {{this.role}}{{/if}}
+                  </div>
+                  {{#if this.projectUrl}}
+                  <div class="entry-subtitle">
+                    <a href="{{this.projectUrl}}">{{this.projectUrl}}</a>
+                  </div>
+                  {{/if}}
+                </div>
+                <div class="entry-date">
+                  {{dateRange this.startDate this.endDate this.isOngoing}}
+                </div>
+              </div>
+
+              {{#if this.description}}
+              <div class="entry-description">{{this.description}}</div>
+              {{/if}}
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems awards}}
+          <div class="section">
+            <div class="section-title">Awards</div>
+            {{#each awards}}
+            <div class="entry">
+              <div class="entry-title">{{this.title}}</div>
+              <div class="entry-subtitle">
+                {{this.issuer}}{{#if this.date}} ·
+                {{formatDate this.date}}{{/if}}
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+
+          {{#ifHasItems resume.customFields}}
+          <div class="section">
+            <div class="section-title">Additional Information</div>
+            {{#each resume.customFields}}
+            <div class="entry-description">
+              <strong>{{this.label}}:</strong> {{this.value}}
+            </div>
+            {{/each}}
+          </div>
+          {{/ifHasItems}}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

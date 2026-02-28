@@ -2,6 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+const isVercel = !!process.env.VERCEL;
+
 /**
  * Ensure a directory exists, or create it
  * @param {string} dir
@@ -19,11 +21,13 @@ const ensureDir = (dir) => {
  * @param {number} [options.maxFileSize] - Optional: max file size in bytes (default 5MB)
  */
 const createUploader = ({ destination, filenameField, allowedMimeTypes: customMimes, maxFileSize }) => {
-  ensureDir(destination);
+  // On Vercel, use /tmp since the filesystem is read-only
+  const resolvedDestination = isVercel ? path.join('/tmp', destination) : destination;
+  ensureDir(resolvedDestination);
 
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, destination);
+      cb(null, resolvedDestination);
     },
     filename: function (req, file, cb) {
       const ext = path.extname(file.originalname);

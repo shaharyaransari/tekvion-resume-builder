@@ -57,6 +57,29 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api', generalLimiter); // Rate Limiter
 app.use(debugMiddleware);
 
+// ========== Lazy DB Connection (for Vercel serverless) ==========
+if (process.env.VERCEL) {
+  let dbConnected = false;
+  app.use(async (req, res, next) => {
+    if (!dbConnected && mongoose.connection.readyState !== 1) {
+      if (!process.env.MONGO_URI) {
+        return res.status(500).json({ success: false, message: 'MONGO_URI is not set' });
+      }
+      try {
+        await mongoose.connect(process.env.MONGO_URI);
+        dbConnected = true;
+        console.log('✅ MongoDB connected (serverless)');
+        await AppSettings.seedDefaults();
+        await MasterData.seedDefaults();
+      } catch (err) {
+        console.error('❌ Failed to connect to MongoDB:', err.message);
+        return res.status(500).json({ success: false, message: 'Database connection failed' });
+      }
+    }
+    next();
+  });
+}
+
 // // Add request logging middleware
 // app.use((req, res, next) => {
 //     if (req.method === 'POST' || req.method === 'PUT') {
@@ -273,4 +296,10 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Only start the HTTP server when NOT on Vercel (Vercel uses serverless functions)
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+// Export app for Vercel serverless entry point
+module.exports = app;

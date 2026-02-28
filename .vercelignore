@@ -1,0 +1,10 @@
+node_modules
+logs
+tests
+uploads/cv-imports/*
+uploads/profile-photos/*
+user-templates
+*.test.js
+*.md
+.env
+.env.*

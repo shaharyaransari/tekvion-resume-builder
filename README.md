@@ -27,17 +27,20 @@ A Node.js Express backend API for the Resume Builder application with MongoDB in
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/resume-builder-backend.git
 cd resume-builder-backend
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Create a `.env` file based on `.env.example`:
+
 ```bash
 cp .env.example .env
 ```
@@ -67,12 +70,14 @@ npm start
 ## Deployment to Vercel
 
 ### Prerequisites
+
 - Vercel account (https://vercel.com)
 - GitHub repository connected to Vercel
 
 ### Steps
 
 1. Push your code to GitHub:
+
 ```bash
 git add .
 git commit -m "Your message"
@@ -122,6 +127,7 @@ Full API documentation available at `/api-docs` endpoint using Swagger UI.
 ## Health Check
 
 Check server status:
+
 ```
 GET /health
 ```

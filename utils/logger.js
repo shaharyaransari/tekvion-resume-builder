@@ -61,7 +61,7 @@ const loggerInstance = createLogger({
 
 // Export matching your existing usage style with added debug
 const logger = {
-  debug: (...args) => loggerInstance.debug(args.map(arg => 
+  debug: (...args) => loggerInstance.debug(args.map(arg =>
     typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
   ).join(' ')),
   info: (...args) => loggerInstance.info(args.map(String).join(' ')),

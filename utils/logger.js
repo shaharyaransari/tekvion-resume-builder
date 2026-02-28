@@ -3,7 +3,7 @@ const path = require('path');
 const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
 
-const isServerless = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV);
+const isServerless = !!process.env.VERCEL;
 
 // Ensure logs directory exists (non-serverless only)
 const logDir = path.join(__dirname, '../logs');

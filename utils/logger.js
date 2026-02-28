@@ -3,9 +3,17 @@ const path = require('path');
 const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
 
-// Ensure logs directory exists
+const isServerless = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV);
+
+// Ensure logs directory exists (non-serverless only)
 const logDir = path.join(__dirname, '../logs');
-if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
+if (!isServerless) {
+  try {
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+  } catch (err) {
+    console.warn('Logger file transport disabled:', err.message);
+  }
+}
 
 // Define log format
 const logFormat = format.combine(
@@ -15,38 +23,40 @@ const logFormat = format.combine(
   })
 );
 
-// Setup transports
-const transportAll = new transports.DailyRotateFile({
-  filename: 'app-%DATE%.log',
-  dirname: logDir,
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '10m',
-  maxFiles: '14d',
-  level: 'debug' // Changed from 'info' to include debug level
-});
+const loggerTransports = [
+  new transports.Console({
+    format: format.combine(format.colorize(), logFormat),
+    level: 'debug'
+  })
+];
 
-const transportError = new transports.DailyRotateFile({
-  filename: 'error-%DATE%.log',
-  dirname: logDir,
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '10m',
-  maxFiles: '30d',
-  level: 'error'
-});
+if (!isServerless) {
+  loggerTransports.unshift(
+    new transports.DailyRotateFile({
+      filename: 'app-%DATE%.log',
+      dirname: logDir,
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '10m',
+      maxFiles: '14d',
+      level: 'debug'
+    }),
+    new transports.DailyRotateFile({
+      filename: 'error-%DATE%.log',
+      dirname: logDir,
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '10m',
+      maxFiles: '30d',
+      level: 'error'
+    })
+  );
+}
 
 const loggerInstance = createLogger({
-  level: 'debug', // Set minimum logging level
+  level: 'debug',
   format: logFormat,
-  transports: [
-    transportAll,
-    transportError,
-    new transports.Console({ 
-      format: format.combine(format.colorize(), logFormat),
-      level: 'debug'
-    })
-  ]
+  transports: loggerTransports
 });
 
 // Export matching your existing usage style with added debug

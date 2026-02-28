@@ -31,7 +31,7 @@ const coverLetterRouter = require('../routes/coverLetter.routes');
 // Middlewares
 const errorHandler = require('../middlewares/error.middleware');
 const {
-  generalLimiter,
+    generalLimiter,
 } = require('../middlewares/rateLimit.middleware');
 const debugMiddleware = require('../middlewares/debug.middleware');
 
@@ -48,11 +48,11 @@ const ResumeAnalytics = require('../models/resumeAnalytics.model');
 
 // Enable CORS with credentials
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Request body parsing
@@ -61,17 +61,61 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Debug middleware
 if (process.env.NODE_ENV === 'development') {
-  app.use(debugMiddleware);
+    app.use(debugMiddleware);
 }
 
 // Rate Limiting
 app.use(generalLimiter);
 
+// ========== Database Connection ==========
+
+let dbConnected = false;
+
+const connectDB = async () => {
+    if (dbConnected || mongoose.connection.readyState === 1) {
+        dbConnected = true;
+        return;
+    }
+
+    if (!process.env.MONGO_URI) {
+        throw new Error('MONGO_URI is not set');
+    }
+
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        dbConnected = true;
+        console.log('✅ MongoDB connected');
+
+        await AppSettings.seedDefaults();
+        console.log('✅ Default settings seeded');
+
+        await MasterData.seedDefaults();
+        console.log('✅ Default master data seeded');
+    } catch (err) {
+        console.error('❌ Failed to connect to MongoDB:', err.message);
+        throw err;
+    }
+};
+
+app.use(async (req, res, next) => {
+    if (!dbConnected) {
+        try {
+            await connectDB();
+        } catch (err) {
+            return res.status(500).json({
+                success: false,
+                message: 'Database connection failed'
+            });
+        }
+    }
+    next();
+});
+
 // ========== API Routes ==========
 
 // Health check endpoint (important for Vercel)
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+    res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // API routes
@@ -98,67 +142,24 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Resume Builder API',
-    version: '1.0.0',
-    docs: '/api-docs',
-    health: '/health'
-  });
+    res.status(200).json({
+        message: 'Resume Builder API',
+        version: '1.0.0',
+        docs: '/api-docs',
+        health: '/health'
+    });
 });
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
 });
 
 // Error handling middleware
 app.use(errorHandler);
-
-// ========== Database Connection ==========
-
-let dbConnected = false;
-
-const connectDB = async () => {
-  if (dbConnected) return;
-  
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    dbConnected = true;
-    console.log('✅ MongoDB connected');
-
-    // Seed default application settings
-    await AppSettings.seedDefaults();
-    console.log('✅ Default settings seeded');
-
-    // Seed default skills and languages
-    await MasterData.seedDefaults();
-    console.log('✅ Default master data seeded');
-  } catch (err) {
-    console.error('❌ Failed to connect to MongoDB:', err.message);
-    throw err;
-  }
-};
-
-// Connect to database on first request
-app.use(async (req, res, next) => {
-  if (!dbConnected) {
-    try {
-      await connectDB();
-    } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: 'Database connection failed'
-      });
-    }
-  }
-  next();
-});
 
 // Export for Vercel
 module.exports = app;
